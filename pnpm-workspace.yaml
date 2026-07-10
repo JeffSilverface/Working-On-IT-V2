@@ -1,0 +1,13 @@
+packages:
+  - "pwa"
+  - "backend"
+  - "landing"
+  - "packages/*"
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+
+allowBuilds:
+  esbuild: true
+  sharp: true

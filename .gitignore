@@ -1,0 +1,30 @@
+# Ancien projet, gardé en référence, jamais commit
+old-app/
+
+# Dependencies
+node_modules/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+.next/
+.nuxt/
+.output/
+storage/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
