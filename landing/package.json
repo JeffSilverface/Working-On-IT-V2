@@ -11,6 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "astro check",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
@@ -27,8 +29,13 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@eslint/js": "^9.39.4",
     "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.39.4",
+    "eslint-plugin-astro": "^1.7.0",
+    "globals": "^17.7.0",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.63.0",
     "vitest": "^4.1.10"
   }
 }

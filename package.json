@@ -13,16 +13,18 @@
     "build:pwa": "pnpm --filter pwa build",
     "build:landing": "pnpm --filter landing build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "concurrently": "^10.0.3",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.2",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.63.0"
   }
 }
