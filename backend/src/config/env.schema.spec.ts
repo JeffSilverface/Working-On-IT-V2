@@ -17,14 +17,12 @@ describe('envSchema', () => {
   });
 
   it('rejects an invalid NODE_ENV', () => {
-    expect(() =>
-      envSchema.parse({ ...validEnv, NODE_ENV: 'local' }),
-    ).toThrow();
+    expect(() => envSchema.parse({ ...validEnv, NODE_ENV: 'local' })).toThrow();
   });
 
   it('rejects a missing DATABASE_URL', () => {
-    const { DATABASE_URL: _DATABASE_URL, ...rest } = validEnv;
-    expect(() => envSchema.parse(rest)).toThrow();
+    const { NODE_ENV, PORT } = validEnv;
+    expect(() => envSchema.parse({ NODE_ENV, PORT })).toThrow();
   });
 
   it('rejects a non-numeric PORT', () => {
