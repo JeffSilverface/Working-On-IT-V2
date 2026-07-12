@@ -1,0 +1,11 @@
+---
+deployment:
+  tasks:
+    - export BRANCH=$(git branch --show-current)
+    - export ENV=$([ "$BRANCH" = "main" ] && echo production || echo staging)
+    - export DEPLOYPATH=/home/paje6276/apps/${ENV}/backend/
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -R backend/. $DEPLOYPATH
+    - source /home/paje6276/nodevenv/apps/${ENV}/backend/24/bin/activate && cd $DEPLOYPATH && npm install && npm run build
+    - /bin/mkdir -p $DEPLOYPATH/tmp
+    - /bin/touch $DEPLOYPATH/tmp/restart.txt
