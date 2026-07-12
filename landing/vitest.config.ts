@@ -5,5 +5,8 @@ export default getViteConfig({
   test: {
     environment: "node",
     globals: true,
+    coverage: {
+      reporter: ["lcov", "text"],
+    },
   },
 });
