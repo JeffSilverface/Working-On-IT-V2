@@ -15,5 +15,8 @@ export default defineConfig({
     globals: true,
     exclude: ["**/node_modules/**", "**/e2e/**"],
     passWithNoTests: true,
+    coverage: {
+      reporter: ["lcov", "text"],
+    },
   },
 });

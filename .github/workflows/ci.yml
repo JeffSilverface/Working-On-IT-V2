@@ -55,6 +55,32 @@ jobs:
       - run: pnpm --filter @working-on-it/shared test
       - run: pnpm --filter @working-on-it/core test
 
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter backend test:coverage
+      - run: pnpm --filter pwa test:coverage
+      - run: pnpm --filter landing test:coverage
+      - run: pnpm --filter @working-on-it/shared test:coverage
+      - run: pnpm --filter @working-on-it/core test:coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            backend/coverage/lcov.info
+            pwa/coverage/lcov.info
+            landing/coverage/lcov.info
+            packages/shared/coverage/lcov.info
+            packages/core/coverage/lcov.info
+
   build:
     name: build
     needs: [audit, quality, test]
@@ -73,12 +99,15 @@ jobs:
 
   sonarcloud:
     name: sonarcloud
-    needs: [test]
+    needs: [coverage]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage-reports
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v8
         env:

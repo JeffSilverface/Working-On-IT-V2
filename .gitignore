@@ -15,6 +15,7 @@ dist/
 .nuxt/
 .output/
 storage/
+coverage/
 
 # Logs
 *.log
