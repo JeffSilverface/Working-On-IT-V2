@@ -20,27 +20,25 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter backend build
-      - name: Install production-only deps with npm
-        run: |
-          cd backend
-          rm -rf node_modules
-          npm install --omit=dev --ignore-scripts
+      - run: pnpm --filter backend run bundle
       - name: Refresh restart trigger
         run: |
           mkdir -p backend/tmp
           date > backend/tmp/restart.txt
-      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_BACK_STAGING_LOGIN }}
           password: ${{ secrets.FTP_BACK_STAGING_PASSWORD }}
-          local-dir: ./backend/
-          exclude: |
-            **/src/**
-            **/test/**
-            **/.git*
-            **/node_modules/.cache/**
+          local-dir: ./backend/bundle/
+          server-dir: ./bundle/
+      - uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_BACK_STAGING_LOGIN }}
+          password: ${{ secrets.FTP_BACK_STAGING_PASSWORD }}
+          local-dir: ./backend/tmp/
+          server-dir: ./tmp/
 
   deploy-pwa:
     name: deploy-pwa
@@ -64,7 +62,7 @@ jobs:
           cp -R pwa/public deploy_pwa/public
           mkdir -p deploy_pwa/tmp
           date > deploy_pwa/tmp/restart.txt
-      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_FRONT_STAGING_LOGIN }}
@@ -83,7 +81,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter landing build
-      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_LANDING_STAGING_LOGIN }}
