@@ -1,7 +1,9 @@
 name: CD - Staging
 
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [staging]
 
 concurrency:
@@ -12,8 +14,11 @@ jobs:
   deploy-backend:
     name: deploy-backend
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -43,8 +48,11 @@ jobs:
   deploy-pwa:
     name: deploy-pwa
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -56,8 +64,12 @@ jobs:
         run: |
           mkdir -p deploy_pwa
           cp -R pwa/.next/standalone/pwa/. deploy_pwa/
-          mkdir -p deploy_pwa/node_modules
-          cp -R pwa/.next/standalone/node_modules/. deploy_pwa/node_modules/
+          mkdir -p deploy_pwa/vendor_modules
+          if [ -d deploy_pwa/node_modules ]; then
+            cp -R deploy_pwa/node_modules/. deploy_pwa/vendor_modules/
+            rm -rf deploy_pwa/node_modules
+          fi
+          cp -R pwa/.next/standalone/node_modules/. deploy_pwa/vendor_modules/
           cp -R pwa/.next/static deploy_pwa/.next/static
           cp -R pwa/public deploy_pwa/public
           mkdir -p deploy_pwa/tmp
@@ -72,8 +84,11 @@ jobs:
   deploy-landing:
     name: deploy-landing
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
