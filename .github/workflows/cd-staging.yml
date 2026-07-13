@@ -1,0 +1,91 @@
+name: CD - Staging
+
+on:
+  push:
+    branches: [staging]
+
+concurrency:
+  group: cd-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy-backend:
+    name: deploy-backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter backend build
+      - name: Install production-only deps with npm
+        run: |
+          cd backend
+          rm -rf node_modules
+          npm install --omit=dev --ignore-scripts
+      - name: Refresh restart trigger
+        run: |
+          mkdir -p backend/tmp
+          date > backend/tmp/restart.txt
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_BACK_STAGING_LOGIN }}
+          password: ${{ secrets.FTP_BACK_STAGING_PASSWORD }}
+          local-dir: ./backend/
+          exclude: |
+            **/src/**
+            **/test/**
+            **/.git*
+            **/node_modules/.cache/**
+
+  deploy-pwa:
+    name: deploy-pwa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter pwa build
+      - name: Flatten standalone output
+        run: |
+          mkdir -p deploy_pwa
+          cp -R pwa/.next/standalone/pwa/. deploy_pwa/
+          mkdir -p deploy_pwa/node_modules
+          cp -R pwa/.next/standalone/node_modules/. deploy_pwa/node_modules/
+          cp -R pwa/.next/static deploy_pwa/.next/static
+          cp -R pwa/public deploy_pwa/public
+          mkdir -p deploy_pwa/tmp
+          date > deploy_pwa/tmp/restart.txt
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_FRONT_STAGING_LOGIN }}
+          password: ${{ secrets.FTP_FRONT_STAGING_PASSWORD }}
+          local-dir: ./deploy_pwa/
+
+  deploy-landing:
+    name: deploy-landing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter landing build
+      - uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_LANDING_STAGING_LOGIN }}
+          password: ${{ secrets.FTP_LANDING_STAGING_PASSWORD }}
+          local-dir: ./landing/dist/
