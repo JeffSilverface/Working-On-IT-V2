@@ -16,7 +16,7 @@ deployment:
     - export PWA_DEPLOYPATH=/home/paje6276/apps/${ENV}/pwa/
     - /bin/mkdir -p $PWA_DEPLOYPATH
     - /bin/cp -R pwa/. $PWA_DEPLOYPATH
-    - source /home/paje6276/nodevenv/apps/${ENV}/pwa/22/bin/activate && cd $PWA_DEPLOYPATH && npm install && npm run build
+    - source /home/paje6276/nodevenv/apps/${ENV}/pwa/22/bin/activate && cd $PWA_DEPLOYPATH && PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install && npm run build
     - /bin/cp -R $PWA_DEPLOYPATH/.next/static $PWA_DEPLOYPATH/.next/standalone/pwa/.next/static
     - /bin/cp -R $PWA_DEPLOYPATH/public $PWA_DEPLOYPATH/.next/standalone/pwa/public
     - /bin/mkdir -p $PWA_DEPLOYPATH/tmp
