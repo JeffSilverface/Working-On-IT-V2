@@ -41,4 +41,4 @@ pnpm typecheck                # tsc across all packages
 
 ## Deployment
 
-Hosted on o2switch (cPanel Node.js Selector + Passenger). `staging` branch deploys to pre-prod, `main` deploys to production.
+Hosted on o2switch. `backend` runs under cPanel Node.js Selector + Passenger (bundled to a single file via esbuild). `pwa` and `landing` are static exports served straight from a subdomain's document root — no Node process needed. `staging` branch deploys to pre-prod, `main` deploys to production.
