@@ -76,6 +76,18 @@ jobs:
           cd deploy_pwa
           npm install --omit=dev --ignore-scripts
           mv node_modules vendor_modules
+      - name: Trim files never needed at runtime
+        run: |
+          cd deploy_pwa/vendor_modules
+          find . -iname "*.md" -delete
+          find . -iname "*.d.ts" -delete
+          find . -iname "*.d.ts.map" -delete
+          find . -iname "LICENSE*" -delete
+          find . -iname "*.map" -delete
+          find . -type d -name "docs" -prune -exec rm -rf {} +
+          find . -type d -name "test" -prune -exec rm -rf {} +
+          find . -type d -name "tests" -prune -exec rm -rf {} +
+          find . -type d -name "__tests__" -prune -exec rm -rf {} +
       - uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
