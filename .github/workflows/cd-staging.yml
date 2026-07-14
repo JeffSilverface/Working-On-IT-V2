@@ -60,40 +60,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter pwa build
-      - name: Assemble deploy folder
-        run: |
-          mkdir -p deploy_pwa
-          cp -R pwa/.next/standalone/pwa/server.js deploy_pwa/
-          cp -R pwa/.next/standalone/pwa/package.json deploy_pwa/
-          cp -R pwa/.next/standalone/pwa/.next deploy_pwa/.next
-          rm -rf deploy_pwa/node_modules
-          cp -R pwa/.next/static deploy_pwa/.next/static
-          cp -R pwa/public deploy_pwa/public
-          mkdir -p deploy_pwa/tmp
-          date > deploy_pwa/tmp/restart.txt
-      - name: Install production deps with plain npm (no pnpm symlinks)
-        run: |
-          cd deploy_pwa
-          npm install --omit=dev --ignore-scripts
-          mv node_modules vendor_modules
-      - name: Trim files never needed at runtime
-        run: |
-          cd deploy_pwa/vendor_modules
-          find . -iname "*.md" -delete
-          find . -iname "*.d.ts" -delete
-          find . -iname "*.d.ts.map" -delete
-          find . -iname "LICENSE*" -delete
-          find . -iname "*.map" -delete
-          find . -type d -name "docs" -prune -exec rm -rf {} +
-          find . -type d -name "test" -prune -exec rm -rf {} +
-          find . -type d -name "tests" -prune -exec rm -rf {} +
-          find . -type d -name "__tests__" -prune -exec rm -rf {} +
       - uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_FRONT_STAGING_LOGIN }}
           password: ${{ secrets.FTP_FRONT_STAGING_PASSWORD }}
-          local-dir: ./deploy_pwa/
+          local-dir: ./pwa/out/
 
   deploy-landing:
     name: deploy-landing

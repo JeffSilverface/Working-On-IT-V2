@@ -14,6 +14,7 @@ dist/
 bundle/
 deploy_pwa/
 .next/
+out/
 .nuxt/
 .output/
 storage/
