@@ -60,20 +60,22 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter pwa build
-      - name: Flatten standalone output
+      - name: Assemble deploy folder
         run: |
           mkdir -p deploy_pwa
-          cp -R pwa/.next/standalone/pwa/. deploy_pwa/
-          mkdir -p deploy_pwa/vendor_modules
-          if [ -d deploy_pwa/node_modules ]; then
-            cp -R deploy_pwa/node_modules/. deploy_pwa/vendor_modules/
-            rm -rf deploy_pwa/node_modules
-          fi
-          cp -R pwa/.next/standalone/node_modules/. deploy_pwa/vendor_modules/
+          cp -R pwa/.next/standalone/pwa/server.js deploy_pwa/
+          cp -R pwa/.next/standalone/pwa/package.json deploy_pwa/
+          cp -R pwa/.next/standalone/pwa/.next deploy_pwa/.next
+          rm -rf deploy_pwa/node_modules
           cp -R pwa/.next/static deploy_pwa/.next/static
           cp -R pwa/public deploy_pwa/public
           mkdir -p deploy_pwa/tmp
           date > deploy_pwa/tmp/restart.txt
+      - name: Install production deps with plain npm (no pnpm symlinks)
+        run: |
+          cd deploy_pwa
+          npm install --omit=dev --ignore-scripts
+          mv node_modules vendor_modules
       - uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_HOST }}
