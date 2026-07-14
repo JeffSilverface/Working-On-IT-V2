@@ -12,6 +12,7 @@ node_modules/
 # Build outputs
 dist/
 bundle/
+deploy_pwa/
 .next/
 .nuxt/
 .output/
