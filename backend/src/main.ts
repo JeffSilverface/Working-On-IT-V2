@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService<Env, true>);
 
-  if (configService.get('NODE_ENV', { infer: true }) !== 'production') {
+  if (configService.get('NODE_ENV', { infer: true }) === 'development') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle('Working On It API')
       .setVersion('0.1.0')
