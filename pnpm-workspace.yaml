@@ -4,9 +4,7 @@ packages:
   - "landing"
   - "packages/*"
 
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+confirmModulesPurge: false
 
 allowBuilds:
   esbuild: true
@@ -14,3 +12,5 @@ allowBuilds:
   "@prisma/engines": true
   "@prisma/client": true
   prisma: true
+  "@scarf/scarf": false
+  unrs-resolver: false

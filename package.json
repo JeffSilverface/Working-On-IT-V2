@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "packageManager": "pnpm@10.28.2",
+  "packageManager": "pnpm@11.13.0",
   "scripts": {
     "dev": "concurrently -n backend,pwa,landing -c blue,green,yellow \"pnpm:dev:backend\" \"pnpm:dev:pwa\" \"pnpm:dev:landing\"",
     "dev:backend": "pnpm --filter backend dev",
