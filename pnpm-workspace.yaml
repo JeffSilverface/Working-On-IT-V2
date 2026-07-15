@@ -11,3 +11,6 @@ ignoredBuiltDependencies:
 allowBuilds:
   esbuild: true
   sharp: true
+  "@prisma/engines": true
+  "@prisma/client": true
+  prisma: true

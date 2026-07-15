@@ -1,0 +1,200 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Better Auth tables
+model User {
+  id                  String           @id @default(cuid())
+  name                String
+  email               String           @unique
+  emailVerified       Boolean          @default(false)
+  image               String?
+  onboardingCompleted Boolean          @default(false)
+  birthDate           DateTime?
+  gender              Gender?
+  city                String?
+  jobTitle            String?
+  experienceLevel     ExperienceLevel?
+  contractTypes       String[]
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  applications Application[]
+  attachments  Attachment[]
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum ExperienceLevel {
+  STUDENT
+  JUNIOR
+  MID
+  SENIOR
+  EXECUTIVE
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Application tracking
+enum ApplicationStatus {
+  DRAFT
+  SENT
+  FOLLOW_UP
+  INTERVIEW
+  WAITING
+  OFFER
+  REJECTED
+  DECLINED
+}
+
+enum InterviewType {
+  PHONE
+  VIDEO
+  ONSITE
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company       String
+  position      String            @default("")
+  location      String            @default("")
+  contractType  String            @default("")
+  salary        String            @default("")
+  offerUrl      String            @default("")
+  source        String            @default("")
+  status        ApplicationStatus @default(DRAFT)
+  score         Int               @default(3)
+  tags          String[]
+  notes         String            @default("")
+  spontaneous   Boolean           @default(false)
+  followUpAt    DateTime?
+  reminderAt    DateTime?
+  offerAccepted Boolean           @default(false)
+  appliedAt     DateTime          @default(now())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  contact       Contact?
+  interviews    Interview[]
+  attachments   Attachment[]
+  followUps     FollowUp[]
+  statusHistory StatusHistory[]
+
+  @@index([userId, status])
+  @@index([userId, updatedAt])
+}
+
+model StatusHistory {
+  id            String            @id @default(cuid())
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  status        ApplicationStatus
+  createdAt     DateTime          @default(now())
+
+  @@index([applicationId, createdAt])
+}
+
+model Contact {
+  id            String      @id @default(cuid())
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  name          String
+  email         String      @default("")
+  phone         String      @default("")
+}
+
+model Interview {
+  id                 String        @id @default(cuid())
+  applicationId      String
+  application        Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  date               DateTime
+  type               InterviewType @default(PHONE)
+  location           String        @default("")
+  contact            String        @default("")
+  notes              String        @default("")
+  calendarEventAdded Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+}
+
+enum AttachmentCategory {
+  CV
+  LETTRE_MOTIVATION
+  RECOMMANDATION
+  AUTRE
+}
+
+model Attachment {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application   Application?       @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  name          String
+  mimeType      String
+  category      AttachmentCategory @default(AUTRE)
+  size          Int
+  createdAt     DateTime           @default(now())
+
+  @@index([userId])
+  @@index([applicationId])
+}
+
+model FollowUp {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  date          DateTime    @default(now())
+  note          String      @default("")
+}

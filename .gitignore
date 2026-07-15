@@ -19,6 +19,7 @@ out/
 .output/
 storage/
 coverage/
+backend/src/generated/
 
 # Logs
 *.log
