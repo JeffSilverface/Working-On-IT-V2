@@ -14,3 +14,4 @@ allowBuilds:
   prisma: true
   "@scarf/scarf": false
   unrs-resolver: false
+  bcrypt: true

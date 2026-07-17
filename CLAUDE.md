@@ -211,7 +211,7 @@ ConfigModule.forRoot({ validate: (config) => envSchema.parse(config) })
 working-on-it/
   ├── /backend                  → NestJS + Prisma + PostgreSQL
   │   └── /src
-  │       ├── /auth             → Better Auth (controller proxy + guard)
+  │       ├── /auth             → JWT access+refresh (strategy, guard, controller)
   │       ├── /applications     → CRUD candidatures
   │       │   ├── /dto          → DTOs NestJS (extends createZodDto)
   │       │   └── *.service.ts / *.controller.ts
@@ -291,7 +291,7 @@ working-on-it/
 | Framework        | NestJS                                                       |
 | ORM              | Prisma                                                       |
 | Base de données  | PostgreSQL (o2switch)                                        |
-| Auth             | Better Auth (sessions httpOnly, pas JWT)                     |
+| Auth             | `@nestjs/jwt` + Passport (JWT access + refresh, cookies httpOnly) |
 | Validation       | Zod via `nestjs-zod` + schémas `@working-on-it/shared`       |
 | Documentation    | Swagger (`@nestjs/swagger`) — décorateurs manuels            |
 | Config           | `@nestjs/config` + validation Zod au boot                    |
@@ -314,7 +314,7 @@ working-on-it/
 | État serveur     | TanStack Query v5                   |
 | État global UI   | Zustand (`@working-on-it/core`)     |
 | Formulaires      | React Hook Form + Zod               |
-| Auth client      | Better Auth client (sessions)       |
+| Auth client      | Cookies httpOnly (access + refresh JWT), pas de stockage token côté JS |
 
 ### /landing — Site vitrine
 
@@ -442,13 +442,15 @@ interface FollowUp {
 
 ---
 
-## Auth — Better Auth
+## Auth — JWT (access + refresh)
 
-- Mode **sessions** uniquement — pas de JWT (logout immédiat impossible avec JWT sans blacklist)
-- Cookies sécurisés (`httpOnly`, `sameSite: lax`)
+- `@nestjs/jwt` + Passport (`passport-jwt`) — pas Better Auth (conçu pour les sessions, pas pour ce pattern)
+- **Access token** JWT courte durée (15 min), stateless — validé par signature seule, aucun call DB par requête
+- **Refresh token** opaque (random, pas JWT), stocké hashé en DB, longue durée — révocable (logout forcé, ban compte, changement de mot de passe = suppression en DB)
+- Les deux transmis en cookies `httpOnly`, `sameSite: lax`, `secure` en prod
 - Routes protégées via `AuthGuard` global NestJS + décorateur `@Public()` pour les exceptions
-- `requireEmailVerification: true` — email vérifié obligatoire avant connexion
-- Google OAuth activé avec `accountLinking`
+- Email vérifié obligatoire avant connexion
+- Google OAuth via `passport-google-oauth20`, lié au compte existant si email déjà présent
 
 ---
 
@@ -480,7 +482,8 @@ interface FollowUp {
 - ❌ `process.env.X` direct dans un service NestJS — passer par `@nestjs/config`
 - ❌ Valeur de fallback hardcodée pour une variable d'env (`?? 'http://localhost:...'`)
 - ❌ Schéma Zod défini deux fois — un seul dans `packages/shared`
-- ❌ JWT pour l'auth — sessions Better Auth uniquement
+- ❌ Access token JWT longue durée sans refresh token révocable en DB
+- ❌ Stocker le refresh token en clair en DB — toujours hashé
 - ❌ Anciens statuts : TO_APPLY, APPLIED, ACCEPTED, ABANDONED
 - ❌ `findUnique({ where: { id } })` seul — toujours `findFirst({ where: { id, userId } })`
 - ❌ Retourner des données sans vérifier que `userId` correspond à l'utilisateur connecté
