@@ -11,6 +11,7 @@
     "bundle": "npm run build && node esbuild.config.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "npx prisma migrate deploy --schema=prisma/schema.prisma",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit",
